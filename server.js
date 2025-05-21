@@ -1,12 +1,3 @@
-const instana = require('@instana/collector');
-// init tracing
-// MUST be done before loading anything else!
-instana({
-    tracing: {
-        enabled: true
-    }
-});
-
 const mongoClient = require('mongodb').MongoClient;
 const mongoObjectID = require('mongodb').ObjectID;
 const bodyParser = require('body-parser');
@@ -22,7 +13,7 @@ const logger = pino({
 const expLogger = expPino({
     logger: logger
 });
-
+// imagine this as developer changing the code
 // MongoDB
 var db;
 var collection;
@@ -38,26 +29,12 @@ app.use((req, res, next) => {
     next();
 });
 
-app.use((req, res, next) => {
-    let dcs = [
-        "asia-northeast2",
-        "asia-south1",
-        "europe-west3",
-        "us-east1",
-        "us-west1"
-    ];
-    let span = instana.currentSpan();
-    span.annotate('custom.sdk.tags.datacenter', dcs[Math.floor(Math.random() * dcs.length)]);
-
-    next();
-});
-
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 app.get('/health', (req, res) => {
     var stat = {
-        app: 'OK',
+        app: 'OKK',
         mongo: mongoConnected
     };
     res.json(stat);
@@ -151,6 +128,7 @@ app.get('/search/:text', (req, res) => {
     }
 });
 
+if (process.env.MONGO == 'true') {
 // set up Mongo
 function mongoConnect() {
     return new Promise((resolve, reject) => {
@@ -166,6 +144,31 @@ function mongoConnect() {
         });
     });
 }
+}
+
+if (process.env.DOCUMENTDB == 'true') {
+function mongoConnect() {
+    return new Promise((resolve, reject) => {
+    var mongoURL = process.env.MONGO_URL || 'mongodb://username:password@mongodb:27017/catalogue?tls=true&replicaSet=rs0&readPreference=secondaryPreferred&retryWrites=false';
+    var client = mongoClient.connect(mongoURL,
+      {
+        // Mutable & Immutable
+        //tlsCAFile: `/home/roboshop/catalogue/rds-combined-ca-bundle.pem` //Specify the DocDB; cert
+        // Container
+        tlsCAFile: `/app/rds-combined-ca-bundle.pem` //Specify the DocDB; cert
+    }, (error, client) => {
+    if(error) {
+        reject(error);
+    } else {
+        db = client.db('catalogue');
+        collection = db.collection('products');
+        resolve('connected');
+    }
+});
+});
+}
+}
+
 
 // mongodb connection retry loop
 function mongoLoop() {
@@ -182,6 +185,9 @@ mongoLoop();
 
 // fire it up!
 const port = process.env.CATALOGUE_SERVER_PORT || '8080';
+const MONGO = process.env.MONGO || 'false';
+const DOCUMENTDB = process.env.DOCUMENTDB || 'false';
+
 app.listen(port, () => {
     logger.info('Started on port', port);
 });
