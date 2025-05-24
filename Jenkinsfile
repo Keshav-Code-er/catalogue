@@ -14,12 +14,20 @@ pipeline{
             }
             
             //sonar-scanner command  expect sonar-project.properties should be available
-            stage('Sonar Scan'){
+            // stage('Sonar Scan'){
+            //       steps {
+            //             sh 'ls -ltr'
+            //             sh 'sonar-scanner'
+            //       }
+            // }
+
+            stage(' build'){
                   steps {
                         sh 'ls -ltr'
-                        sh 'sonar-scanner'
+                        
                   }
             }
+
 
              stage('Deploy'){
                   steps {
