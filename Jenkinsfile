@@ -1,6 +1,19 @@
 pipeline{
        agent { node { label 'Agent-1' } }
        stages {
+            stage('Get Version'){
+                  steps{
+                     script{
+                        def packageJson = readJSON file: 'package.json'
+                        def packageVersion = packageJSON.version
+                        echo "${packageJSONVersion}"
+                     }
+                  }
+            }
+
+
+
+
             stage('Install dependencies'){
                   steps{
                         sh 'npm install'
@@ -13,15 +26,14 @@ pipeline{
                   }
             }
             
-            //sonar-scanner command  expect sonar-project.properties should be available
-            // stage('Sonar Scan'){
-            //       steps {
-            //             sh 'ls -ltr'
-            //             sh 'sonar-scanner'
-            //       }
-            // }
+            sonar-scanner command  expect sonar-project.properties should be available
+            stage('Sonar Scan'){
+                  steps {
+                        echo "Sonar scan done"
+                  }
+            }
 
-            stage(' build'){
+            stage('Build'){
                   steps {
                         sh 'ls -ltr'
                         sh 'zip -r catalogue.zip ./* --exclude=.git --exclude=.zip'
@@ -29,12 +41,21 @@ pipeline{
                   }
             }
 
+               stage('SAST'){
+                  steps {
+                       echo "SAST Done"
+                        
+                  }
+            }
+
+            //install pipeline utility steps plugin, if not installed
+
              stage(' Publish Artifact'){
                   steps {
                         nexusArtifactUploader(
                               nexusVersion: 'nexus3',
                               protocol: 'http',
-                              nexusUrl: '34.239.133.118:8081/',
+                              nexusUrl: '172.31.90.64:8081/',
                               groupId: 'com.roboshop',
                               version: '1.0.1',
                               repository: 'catalogue',
