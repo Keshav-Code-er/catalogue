@@ -1,11 +1,15 @@
 pipeline{
        agent { node { label 'Agent-1' } }
+       environment{
+            //here if you create any variable you will have global access, since it is environment no need of def 
+            packageVersion = ''
+       }
        stages {
             stage('Get Version'){
                   steps{
                      script{
                         def packageJson = readJSON file: 'package.json'
-                        def packageVersion = packageJson.version
+                        packageVersion = packageJson.version
                         echo "version: ${packageVersion}"
                      }
                   }
@@ -44,27 +48,27 @@ pipeline{
 
             //install pipeline utility steps plugin, if not installed
 
-//              stage(' Publish Artifact'){
-//                   steps {
-//                         nexusArtifactUploader(
-//                               nexusVersion: 'nexus3',
-//                               protocol: 'http',
-//                               nexusUrl: '172.31.90.64:8081/',
-//                               groupId: 'com.roboshop',
-//                               version: '1.0.1',
-//                               repository: 'catalogue',
-//                               credentialsId: 'nexus-auth',
-//                               artifacts: [
-//                                     [artifactId: 'catalogue',
-//                                     classifier: '',
-//                                     file: 'catalogue.zip',
-//                                     type: 'zip']
-//             ]
-//      )
+             stage(' Publish Artifact'){
+                  steps {
+                        nexusArtifactUploader(
+                              nexusVersion: 'nexus3',
+                              protocol: 'http',
+                              nexusUrl: '34.207.166.144:8081/',
+                              groupId: 'com.roboshop',
+                              version: "$packageVersion",
+                              repository: 'catalogue',
+                              credentialsId: 'nexus-auth',
+                              artifacts: [
+                                    [artifactId: 'catalogue',
+                                    classifier: '',
+                                    file: 'catalogue.zip',
+                                    type: 'zip']
+            ]
+     )
                        
                         
-//                   }
-//             }
+                  }
+            }
 
 
              stage('Deploy'){
