@@ -75,7 +75,7 @@ pipeline{
              stage('Deploy'){
                   steps {
                         echo 'Deployment'
-                        build job: "../../catalogue-deployment", wait: true
+                        build job: "../catalogue-deployment", wait: true
                   }
             }
        }
