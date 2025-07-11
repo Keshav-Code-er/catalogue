@@ -9,4 +9,10 @@ def configMap = [
 ]
 
 // this is .groovy file name and function inside it
-pipelineDecision.decidePipeline(configMap)
+//if not master then trigger pipeline
+if (! env.BRANCH_NAME.equalsIgnoreCase('master')){
+      pipelineDecision.decidePipeline(configMap)
+}
+else{
+      echo "master PROD deployment should happen through CR "
+}
