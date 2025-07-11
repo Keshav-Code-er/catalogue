@@ -4,8 +4,8 @@
 @Library('roboshop-library') _
 
 def configMap = [
-      application: 'nodeJSVM',
-      component: 'catalogue'
+      application: "nodeJSVM",
+      component: "catalogue"
 ]
 
 // this is .groovy file name and function inside it
